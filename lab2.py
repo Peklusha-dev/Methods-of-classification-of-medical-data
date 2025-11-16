@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.datasets import load_iris
+import pandas as pd
+from scipy.stats import gaussian_kde  # Добавь эту строку
 
 # 1. Загрузка данных ирисов Фишера
 ds = load_iris()
@@ -9,7 +11,7 @@ target = ds.target
 
 # Берем только setosa и versicolor
 data = data[:100]
-target = target[:100]
+target = target[:100]  # ОБЯЗАТЕЛЬНО обрезать target тоже!
 
 # 2. Построение диаграмм hist и plot по 3-му признаку (длина лепестка)
 plt.figure(figsize=(15, 5))
@@ -29,18 +31,25 @@ plt.grid(True)
 
 # Plot
 plt.subplot(1, 2, 2)
-plt.plot(sorted(setosa_petal_length), np.arange(len(setosa_petal_length))/len(setosa_petal_length),
-         'b-', linewidth=2, label='setosa')
-plt.plot(sorted(versicolor_petal_length), np.arange(len(versicolor_petal_length))/len(versicolor_petal_length),
-         'r-', linewidth=2, label='versicolor')
+
+for cls, color in zip(["setosa", "versicolor"], ["blue", "red"]):
+    if cls == "setosa":
+        subset = setosa_petal_length
+    else:
+        subset = versicolor_petal_length
+
+    # Сортируем значения и создаем гистограмму
+    sorted_subset = np.sort(subset)
+    count_arr, val_arr = np.histogram(sorted_subset, bins=15)
+
+    # Строим график по точкам гистограммы
+    plt.plot(val_arr[1:], count_arr, label=cls, color=color, linewidth=2)
+
 plt.xlabel('Длина лепестка (cm)')
-plt.ylabel('Эмпирическая функция распределения')
+plt.ylabel('Количество')
 plt.title('Plot: Длина лепестка для setosa и versicolor')
 plt.legend()
 plt.grid(True)
-
-plt.tight_layout()
-plt.show()
 
 # 3. Boxplot по 2-му признаку (ширина чашелистика)
 plt.figure(figsize=(8, 6))
